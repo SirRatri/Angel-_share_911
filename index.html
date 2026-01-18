@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Dreamweaver - Light Version</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        /* Màu sắc chuẩn theo thiết kế của bạn */
+        .bg-theme-sidebar { background-color: #fff1e1; }
+        .gradient-search { background: linear-gradient(90deg, #fbcfe8 0%, #fef9c3 100%); }
+        .btn-tag { background-color: #f9a8d4; color: #1f2937; }
+        
+        /* Ẩn thanh cuộn cho đẹp nhưng vẫn vuốt được */
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        
+        /* Hiệu ứng bấm nút nhún nhẹ */
+        .active-scale:active { transform: scale(0.95); }
+    </style>
+</head>
+<body class="bg-white text-gray-800 font-sans pb-24 md:pb-0"> 
+    <div class="flex min-h-screen">
+
+        <aside class="hidden md:flex w-64 bg-theme-sidebar flex-col items-center py-6 border-r border-orange-100 sticky top-0 h-screen z-40">
+            <div class="mb-8 text-center">
+                <div class="w-20 h-20 bg-white rounded-xl shadow-sm mx-auto flex items-center justify-center overflow-hidden">
+                    <img src="https://via.placeholder.com/80?text=LOGO" class="w-full object-cover">
+                </div>
+                <h1 class="font-bold text-gray-700 mt-3 text-sm tracking-widest uppercase">Dream Weaver</h1>
+            </div>
+            
+            <nav class="w-full px-4 space-y-2">
+                <a href="#" class="flex items-center gap-3 p-3 bg-white rounded-xl shadow-sm text-pink-500 font-bold active-scale transition-transform">
+                    <i class="fa-solid fa-house w-6 text-center"></i> <span>Trang chủ</span>
+                </a>
+                <a href="#" class="flex items-center gap-3 p-3 text-gray-500 hover:bg-white hover:text-pink-500 hover:shadow-sm rounded-xl font-bold transition-all">
+                    <i class="fa-solid fa-book-open w-6 text-center"></i> <span>Thư viện</span>
+                </a>
+                <a href="#" class="flex items-center gap-3 p-3 text-gray-500 hover:bg-white hover:text-pink-500 hover:shadow-sm rounded-xl font-bold transition-all">
+                    <i class="fa-solid fa-gear w-6 text-center"></i> <span>Cài đặt</span>
+                </a>
+            </nav>
+        </aside>
+
+        <main class="flex-1 p-4 md:p-8">
+            
+            <header class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
+                <div class="gradient-search flex items-center px-4 py-3 rounded-full w-full md:w-2/3 shadow-sm border border-pink-100">
+                    <i class="fa-solid fa-magnifying-glass text-gray-500 mr-2"></i>
+                    <input type="text" placeholder="Tìm tên truyện, tác giả..." class="bg-transparent outline-none w-full text-sm font-bold placeholder-gray-500 text-gray-800">
+                </div>
+
+                <div class="flex items-center justify-between md:justify-end gap-3">
+                    <button class="bg-green-500 text-white font-black text-xs px-4 py-2 rounded-lg shadow active-scale">UP MAX</button>
+                    <div class="flex items-center gap-2">
+                        <div class="text-right hidden md:block">
+                            <p class="text-xs font-bold">Trang Huỳnh</p>
+                            <p class="text-[10px] text-gray-500">Member</p>
+                        </div>
+                        <img src="https://via.placeholder.com/40" class="w-10 h-10 rounded-full border border-gray-200">
+                    </div>
+                </div>
+            </header>
+
+            <div class="flex gap-2 overflow-x-auto no-scrollbar mb-6 pb-2">
+                <button class="btn-tag px-5 py-2 rounded-full text-xs font-bold whitespace-nowrap shadow-sm active-scale">Truyện ngôn tình</button>
+                <button class="btn-tag px-5 py-2 rounded-full text-xs font-bold whitespace-nowrap shadow-sm active-scale">Học đường</button>
+                <button class="btn-tag px-5 py-2 rounded-full text-xs font-bold whitespace-nowrap shadow-sm active-scale">Xuyên không</button>
+                <button class="btn-tag px-5 py-2 rounded-full text-xs font-bold whitespace-nowrap shadow-sm active-scale">Tổng tài</button>
+                <button class="bg-gray-100 w-8 h-8 rounded-full flex-shrink-0 flex items-center justify-center text-gray-500">
+                    <i class="fa-solid fa-chevron-right text-xs"></i>
+                </button>
+            </div>
+
+            <h2 class="font-bold text-lg mb-4 border-l-4 border-pink-400 pl-3">Truyện mới cập nhật</h2>
+            
+            <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 md:gap-6">
+                
+                <div class="group cursor-pointer active-scale transition-transform">
+                    <div class="relative aspect-[2/3] rounded-lg overflow-hidden mb-2 shadow-md">
+                        <img src="https://via.placeholder.com/300x450" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">
+                        <div class="absolute top-1 right-1 bg-yellow-400 text-[9px] font-bold px-1.5 py-0.5 rounded">VIP</div>
+                    </div>
+                    <h3 class="font-bold text-gray-800 text-xs md:text-sm line-clamp-1">Cô Dâu Của Thủy Thần</h3>
+                    <div class="flex justify-between text-[10px] text-gray-500 mt-1">
+                        <span><i class="fa-regular fa-eye"></i> 1.2M</span>
+                        <span><i class="fa-solid fa-heart text-pink-400"></i> 50K</span>
+                    </div>
+                </div>
+                <div class="group cursor-pointer active-scale transition-transform">
+                    <div class="relative aspect-[2/3] rounded-lg overflow-hidden mb-2 shadow-md">
+                        <img src="https://via.placeholder.com/300x450/pink" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">
+                    </div>
+                    <h3 class="font-bold text-gray-800 text-xs md:text-sm line-clamp-1">Nàng Công Chúa Nổi Loạn</h3>
+                    <div class="flex justify-between text-[10px] text-gray-500 mt-1">
+                        <span><i class="fa-regular fa-eye"></i> 800K</span>
+                        <span><i class="fa-solid fa-heart text-pink-400"></i> 12K</span>
+                    </div>
+                </div>
+
+                <div class="group cursor-pointer active-scale transition-transform">
+                    <div class="relative aspect-[2/3] rounded-lg overflow-hidden mb-2 shadow-md">
+                        <img src="https://via.placeholder.com/300x450/lightblue" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">
+                    </div>
+                    <h3 class="font-bold text-gray-800 text-xs md:text-sm line-clamp-1">Thiếu Gia Lạnh Lùng</h3>
+                    <div class="flex justify-between text-[10px] text-gray-500 mt-1">
+                        <span><i class="fa-regular fa-eye"></i> 5M</span>
+                        <span><i class="fa-solid fa-heart text-pink-400"></i> 200K</span>
+                    </div>
+                </div>
+
+                 <div class="group cursor-pointer active-scale transition-transform">
+                    <div class="relative aspect-[2/3] rounded-lg overflow-hidden mb-2 shadow-md">
+                        <img src="https://via.placeholder.com/300x450/lightgreen" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">
+                    </div>
+                    <h3 class="font-bold text-gray-800 text-xs md:text-sm line-clamp-1">Sát Thủ Học Đường</h3>
+                    <div class="flex justify-between text-[10px] text-gray-500 mt-1">
+                        <span><i class="fa-regular fa-eye"></i> 90K</span>
+                        <span><i class="fa-solid fa-heart text-pink-400"></i> 2K</span>
+                    </div>
+                </div>
+
+            </div>
+        </main>
+    </div>
+
+    <nav class="md:hidden fixed bottom-0 left-0 w-full bg-white border-t border-gray-200 flex justify-around items-center py-3 z-50 shadow-[0_-5px_10px_rgba(0,0,0,0.02)]">
+        <a href="#" class="flex flex-col items-center text-pink-500">
+            <i class="fa-solid fa-house text-xl mb-1"></i>
+            <span class="text-[9px] font-bold">Trang chủ</span>
+        </a>
+        <a href="#" class="flex flex-col items-center text-gray-400 hover:text-pink-500">
+            <i class="fa-solid fa-compass text-xl mb-1"></i>
+            <span class="text-[9px] font-bold">Khám phá</span>
+        </a>
+        <div class="relative -top-5">
+            <a href="#" class="flex items-center justify-center w-14 h-14 bg-pink-500 rounded-full text-white shadow-lg border-4 border-white">
+                <i class="fa-solid fa-book-open text-xl"></i>
+            </a>
+        </div>
+        <a href="#" class="flex flex-col items-center text-gray-400 hover:text-pink-500">
+            <i class="fa-regular fa-bell text-xl mb-1"></i>
+            <span class="text-[9px] font-bold">Thông báo</span>
+        </a>
+        <a href="#" class="flex flex-col items-center text-gray-400 hover:text-pink-500">
+            <i class="fa-regular fa-user text-xl mb-1"></i>
+            <span class="text-[9px] font-bold">Của tôi</span>
+        </a>
+    </nav>
+
+</body>
+</html>
