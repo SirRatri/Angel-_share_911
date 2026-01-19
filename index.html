@@ -1,154 +1,284 @@
-<!DOCTYPE html>
-<html lang="vi">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Dreamweaver - Light Version</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <style>
-        /* Màu sắc chuẩn theo thiết kế của bạn */
-        .bg-theme-sidebar { background-color: #fff1e1; }
-        .gradient-search { background: linear-gradient(90deg, #fbcfe8 0%, #fef9c3 100%); }
-        .btn-tag { background-color: #f9a8d4; color: #1f2937; }
+"use client";
+
+import React, { useState, useEffect, useMemo, useCallback } from "react";
+import Image from "next/image";
+import { motion, AnimatePresence } from "framer-motion";
+import { Search, Home, Library, Settings, Bell, Heart, Eye, Menu, X } from "lucide-react";
+import { clsx, type ClassValue } from "clsx";
+import { twMerge } from "tailwind-merge";
+
+// --- 1. UTILS & CONFIG (Giả lập cấu trúc dự án lớn) ---
+function cn(...inputs: ClassValue[]) {
+  return twMerge(clsx(inputs));
+}
+
+// Bitmask cho thể loại (Kỹ thuật tối ưu CPU)
+const GENRES = {
+  ALL: 0,
+  ROMANCE: 1 << 0,  // 0001
+  ACTION: 1 << 1,   // 0010
+  BOYS_LOVE: 1 << 2,// 0100
+  NOVEL: 1 << 3,    // 1000
+  SEX: 1 << 4       // 10000 (Dựa theo ảnh của bạn :D)
+};
+
+// Data giả lập (Sau này lấy từ file JSON tĩnh trên CDN)
+const MOCK_DB = [
+  { id: 1, title: "Cô Dâu Thủy Thần", views: 5000000, likes: 87000, chapter: 128, cover: "https://images.unsplash.com/photo-1618519764620-7403abdbdfe9?w=400&q=80", mask: GENRES.ROMANCE | GENRES.NOVEL },
+  { id: 2, title: "Nước Mắt Đóa Hoa Tàn", views: 63000000, likes: 465000, chapter: 45, cover: "https://images.unsplash.com/photo-1640536437532-6e216260a4f5?w=400&q=80", mask: GENRES.ROMANCE | GENRES.SEX },
+  { id: 3, title: "Khi Chuông Điện Thoại Reo", views: 42000000, likes: 251000, chapter: 90, cover: "https://images.unsplash.com/photo-1614726365203-c3df95a5f979?w=400&q=80", mask: GENRES.ACTION | GENRES.ROMANCE },
+  { id: 4, title: "Tiểu Thư Đỏng Đảnh", views: 2000000000, likes: 867000, chapter: 210, cover: "https://images.unsplash.com/photo-1541963463532-d68292c34b19?w=400&q=80", mask: GENRES.NOVEL | GENRES.ROMANCE },
+  { id: 5, title: "Fullhouse - Ngôi Nhà", views: 30000000, likes: 255000, chapter: 15, cover: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=400&q=80", mask: GENRES.ROMANCE },
+  { id: 6, title: "Solo Leveling", views: 99000000, likes: 1200000, chapter: 179, cover: "https://images.unsplash.com/photo-1536053428945-8c76efde5e81?w=400&q=80", mask: GENRES.ACTION },
+  { id: 7, title: "Bj Alex", views: 12000000, likes: 500000, chapter: 80, cover: "https://images.unsplash.com/photo-1620336655052-b57986f5a26a?w=400&q=80", mask: GENRES.BOYS_LOVE | GENRES.SEX },
+  { id: 8, title: "Painter of the Night", views: 45000000, likes: 900000, chapter: 102, cover: "https://images.unsplash.com/photo-1578632767115-351597cf2477?w=400&q=80", mask: GENRES.BOYS_LOVE },
+];
+
+const CATEGORIES = [
+  { id: GENRES.ROMANCE, label: "Truyện ngôn tình" },
+  { id: GENRES.SEX, label: "Truyện 18+" }, // Label ngắn gọn hơn trong ảnh
+  { id: GENRES.BOYS_LOVE, label: "Boy's love" },
+  { id: GENRES.NOVEL, label: "Tiểu thuyết" },
+  { id: GENRES.ACTION, label: "Hành động" },
+];
+
+// Hàm format số (30M, 255K) cho gọn
+const formatNumber = (num: number) => {
+  return Intl.NumberFormat("en-US", {
+    notation: "compact",
+    maximumFractionDigits: 1
+  }).format(num);
+};
+
+// --- 2. COMPONENTS ---
+
+// Card Truyện (Optimized Component)
+const ComicCard = ({ data }: { data: typeof MOCK_DB[0] }) => {
+  return (
+    <motion.div
+      layout
+      initial={{ opacity: 0, scale: 0.9 }}
+      animate={{ opacity: 1, scale: 1 }}
+      exit={{ opacity: 0, scale: 0.9 }}
+      transition={{ duration: 0.2 }}
+      className="group relative flex flex-col gap-2 cursor-pointer"
+    >
+      {/* Container ảnh: Aspect Ratio cố định để tránh nhảy layout (CLS) */}
+      <div className="relative w-full aspect-[3/4] rounded-2xl overflow-hidden bg-gray-200 shadow-sm border border-brand-accent/30">
         
-        /* Ẩn thanh cuộn cho đẹp nhưng vẫn vuốt được */
-        .no-scrollbar::-webkit-scrollbar { display: none; }
-        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
-        
-        /* Hiệu ứng bấm nút nhún nhẹ */
-        .active-scale:active { transform: scale(0.95); }
-    </style>
-</head>
-<body class="bg-white text-gray-800 font-sans pb-24 md:pb-0"> 
-    <div class="flex min-h-screen">
-
-        <aside class="hidden md:flex w-64 bg-theme-sidebar flex-col items-center py-6 border-r border-orange-100 sticky top-0 h-screen z-40">
-            <div class="mb-8 text-center">
-                <div class="w-20 h-20 bg-white rounded-xl shadow-sm mx-auto flex items-center justify-center overflow-hidden">
-                    <img src="https://via.placeholder.com/80?text=LOGO" class="w-full object-cover">
-                </div>
-                <h1 class="font-bold text-gray-700 mt-3 text-sm tracking-widest uppercase">Dream Weaver</h1>
-            </div>
-            
-            <nav class="w-full px-4 space-y-2">
-                <a href="#" class="flex items-center gap-3 p-3 bg-white rounded-xl shadow-sm text-pink-500 font-bold active-scale transition-transform">
-                    <i class="fa-solid fa-house w-6 text-center"></i> <span>Trang chủ</span>
-                </a>
-                <a href="#" class="flex items-center gap-3 p-3 text-gray-500 hover:bg-white hover:text-pink-500 hover:shadow-sm rounded-xl font-bold transition-all">
-                    <i class="fa-solid fa-book-open w-6 text-center"></i> <span>Thư viện</span>
-                </a>
-                <a href="#" class="flex items-center gap-3 p-3 text-gray-500 hover:bg-white hover:text-pink-500 hover:shadow-sm rounded-xl font-bold transition-all">
-                    <i class="fa-solid fa-gear w-6 text-center"></i> <span>Cài đặt</span>
-                </a>
-            </nav>
-        </aside>
-
-        <main class="flex-1 p-4 md:p-8">
-            
-            <header class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
-                <div class="gradient-search flex items-center px-4 py-3 rounded-full w-full md:w-2/3 shadow-sm border border-pink-100">
-                    <i class="fa-solid fa-magnifying-glass text-gray-500 mr-2"></i>
-                    <input type="text" placeholder="Tìm tên truyện, tác giả..." class="bg-transparent outline-none w-full text-sm font-bold placeholder-gray-500 text-gray-800">
-                </div>
-
-                <div class="flex items-center justify-between md:justify-end gap-3">
-                    <button class="bg-green-500 text-white font-black text-xs px-4 py-2 rounded-lg shadow active-scale">UP MAX</button>
-                    <div class="flex items-center gap-2">
-                        <div class="text-right hidden md:block">
-                            <p class="text-xs font-bold">Trang Huỳnh</p>
-                            <p class="text-[10px] text-gray-500">Member</p>
-                        </div>
-                        <img src="https://via.placeholder.com/40" class="w-10 h-10 rounded-full border border-gray-200">
-                    </div>
-                </div>
-            </header>
-
-            <div class="flex gap-2 overflow-x-auto no-scrollbar mb-6 pb-2">
-                <button class="btn-tag px-5 py-2 rounded-full text-xs font-bold whitespace-nowrap shadow-sm active-scale">Truyện ngôn tình</button>
-                <button class="btn-tag px-5 py-2 rounded-full text-xs font-bold whitespace-nowrap shadow-sm active-scale">Học đường</button>
-                <button class="btn-tag px-5 py-2 rounded-full text-xs font-bold whitespace-nowrap shadow-sm active-scale">Xuyên không</button>
-                <button class="btn-tag px-5 py-2 rounded-full text-xs font-bold whitespace-nowrap shadow-sm active-scale">Tổng tài</button>
-                <button class="bg-gray-100 w-8 h-8 rounded-full flex-shrink-0 flex items-center justify-center text-gray-500">
-                    <i class="fa-solid fa-chevron-right text-xs"></i>
-                </button>
-            </div>
-
-            <h2 class="font-bold text-lg mb-4 border-l-4 border-pink-400 pl-3">Truyện mới cập nhật</h2>
-            
-            <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 md:gap-6">
-                
-                <div class="group cursor-pointer active-scale transition-transform">
-                    <div class="relative aspect-[2/3] rounded-lg overflow-hidden mb-2 shadow-md">
-                        <img src="https://via.placeholder.com/300x450" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">
-                        <div class="absolute top-1 right-1 bg-yellow-400 text-[9px] font-bold px-1.5 py-0.5 rounded">VIP</div>
-                    </div>
-                    <h3 class="font-bold text-gray-800 text-xs md:text-sm line-clamp-1">Cô Dâu Của Thủy Thần</h3>
-                    <div class="flex justify-between text-[10px] text-gray-500 mt-1">
-                        <span><i class="fa-regular fa-eye"></i> 1.2M</span>
-                        <span><i class="fa-solid fa-heart text-pink-400"></i> 50K</span>
-                    </div>
-                </div>
-                <div class="group cursor-pointer active-scale transition-transform">
-                    <div class="relative aspect-[2/3] rounded-lg overflow-hidden mb-2 shadow-md">
-                        <img src="https://via.placeholder.com/300x450/pink" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">
-                    </div>
-                    <h3 class="font-bold text-gray-800 text-xs md:text-sm line-clamp-1">Nàng Công Chúa Nổi Loạn</h3>
-                    <div class="flex justify-between text-[10px] text-gray-500 mt-1">
-                        <span><i class="fa-regular fa-eye"></i> 800K</span>
-                        <span><i class="fa-solid fa-heart text-pink-400"></i> 12K</span>
-                    </div>
-                </div>
-
-                <div class="group cursor-pointer active-scale transition-transform">
-                    <div class="relative aspect-[2/3] rounded-lg overflow-hidden mb-2 shadow-md">
-                        <img src="https://via.placeholder.com/300x450/lightblue" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">
-                    </div>
-                    <h3 class="font-bold text-gray-800 text-xs md:text-sm line-clamp-1">Thiếu Gia Lạnh Lùng</h3>
-                    <div class="flex justify-between text-[10px] text-gray-500 mt-1">
-                        <span><i class="fa-regular fa-eye"></i> 5M</span>
-                        <span><i class="fa-solid fa-heart text-pink-400"></i> 200K</span>
-                    </div>
-                </div>
-
-                 <div class="group cursor-pointer active-scale transition-transform">
-                    <div class="relative aspect-[2/3] rounded-lg overflow-hidden mb-2 shadow-md">
-                        <img src="https://via.placeholder.com/300x450/lightgreen" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">
-                    </div>
-                    <h3 class="font-bold text-gray-800 text-xs md:text-sm line-clamp-1">Sát Thủ Học Đường</h3>
-                    <div class="flex justify-between text-[10px] text-gray-500 mt-1">
-                        <span><i class="fa-regular fa-eye"></i> 90K</span>
-                        <span><i class="fa-solid fa-heart text-pink-400"></i> 2K</span>
-                    </div>
-                </div>
-
-            </div>
-        </main>
-    </div>
-
-    <nav class="md:hidden fixed bottom-0 left-0 w-full bg-white border-t border-gray-200 flex justify-around items-center py-3 z-50 shadow-[0_-5px_10px_rgba(0,0,0,0.02)]">
-        <a href="#" class="flex flex-col items-center text-pink-500">
-            <i class="fa-solid fa-house text-xl mb-1"></i>
-            <span class="text-[9px] font-bold">Trang chủ</span>
-        </a>
-        <a href="#" class="flex flex-col items-center text-gray-400 hover:text-pink-500">
-            <i class="fa-solid fa-compass text-xl mb-1"></i>
-            <span class="text-[9px] font-bold">Khám phá</span>
-        </a>
-        <div class="relative -top-5">
-            <a href="#" class="flex items-center justify-center w-14 h-14 bg-pink-500 rounded-full text-white shadow-lg border-4 border-white">
-                <i class="fa-solid fa-book-open text-xl"></i>
-            </a>
+        {/* Badge Chap Mới */}
+        <div className="absolute top-2 right-2 z-10 bg-green-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full shadow-md">
+           Ch. {data.chapter}
         </div>
-        <a href="#" class="flex flex-col items-center text-gray-400 hover:text-pink-500">
-            <i class="fa-regular fa-bell text-xl mb-1"></i>
-            <span class="text-[9px] font-bold">Thông báo</span>
-        </a>
-        <a href="#" class="flex flex-col items-center text-gray-400 hover:text-pink-500">
-            <i class="fa-regular fa-user text-xl mb-1"></i>
-            <span class="text-[9px] font-bold">Của tôi</span>
-        </a>
-    </nav>
 
-</body>
-</html>
+        {/* Ảnh Lazy Load */}
+        <Image
+          src={data.cover}
+          alt={data.title}
+          fill
+          loading="lazy"
+          className="object-cover transition-transform duration-500 group-hover:scale-110 will-change-transform"
+          sizes="(max-width: 768px) 50vw, (max-width: 1200px) 33vw, 20vw"
+        />
+        
+        {/* Lớp phủ khi hover */}
+        <div className="absolute inset-0 bg-black/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+      </div>
+
+      {/* Thông tin */}
+      <div className="space-y-1">
+        <h3 className="font-bold text-gray-800 text-sm md:text-base line-clamp-2 leading-tight min-h-[2.5em] group-hover:text-pink-500 transition-colors">
+          {data.title}
+        </h3>
+        
+        {/* Stats thay vì text dài */}
+        <div className="flex items-center justify-between text-xs text-gray-500 font-medium">
+          <div className="flex items-center gap-1 bg-white/50 px-1.5 py-0.5 rounded-md">
+            <Eye size={12} className="text-blue-400" />
+            <span>{formatNumber(data.views)}</span>
+          </div>
+          <div className="flex items-center gap-1 bg-white/50 px-1.5 py-0.5 rounded-md">
+            <Heart size={12} className="text-red-400 fill-red-400/20" />
+            <span>{formatNumber(data.likes)}</span>
+          </div>
+        </div>
+      </div>
+    </motion.div>
+  );
+};
+
+// --- 3. MAIN PAGE LAYOUT ---
+
+export default function HomePage() {
+  const [activeTab, setActiveTab] = useState(0); // 0 = All
+  const [searchQuery, setSearchQuery] = useState("");
+  const [results, setResults] = useState(MOCK_DB);
+  const [isSidebarOpen, setSidebarOpen] = useState(false);
+
+  // LOGIC TÌM KIẾM & LỌC (Giả lập Web Worker logic)
+  const handleFilter = useCallback(() => {
+    // Kỹ thuật Debounce có thể áp dụng ở đây nếu data lớn
+    let filtered = MOCK_DB;
+
+    // 1. Lọc theo Tag (Bitmasking - Siêu nhanh)
+    if (activeTab !== 0) {
+      filtered = filtered.filter(item => (item.mask & activeTab) === activeTab);
+    }
+
+    // 2. Lọc theo tên (Search)
+    if (searchQuery.trim()) {
+      const q = searchQuery.toLowerCase();
+      filtered = filtered.filter(item => item.title.toLowerCase().includes(q));
+    }
+
+    setResults(filtered);
+  }, [activeTab, searchQuery]);
+
+  // Trigger lọc mỗi khi input thay đổi
+  useEffect(() => {
+    handleFilter();
+  }, [handleFilter]);
+
+  return (
+    <div className="flex min-h-screen bg-brand-bg font-sans overflow-x-hidden">
+      
+      {/* MOBILE MENU BUTTON */}
+      <button 
+        onClick={() => setSidebarOpen(!isSidebarOpen)}
+        className="md:hidden fixed top-4 left-4 z-50 p-2 bg-brand-sidebar rounded-full shadow-lg"
+      >
+        {isSidebarOpen ? <X size={20} /> : <Menu size={20} />}
+      </button>
+
+      {/* --- SIDEBAR --- */}
+      <aside className={cn(
+        "fixed md:sticky top-0 h-screen w-64 bg-brand-sidebar border-r border-orange-100 flex flex-col p-6 z-40 transition-transform duration-300 md:translate-x-0",
+        isSidebarOpen ? "translate-x-0" : "-translate-x-full"
+      )}>
+        {/* Logo */}
+        <div className="mb-12 flex flex-col items-center">
+            <div className="w-20 h-20 rounded-full bg-white border-2 border-brand-primary p-1 overflow-hidden shadow-lg mb-2">
+                 {/* Giả lập logo thỏ trong ảnh */}
+                 <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Bunny" alt="Logo" className="w-full h-full object-cover" />
+            </div>
+            <h1 className="font-bold text-xl text-center text-orange-800 leading-tight">
+                Dream<br/><span className="text-brand-primary">weaver</span>
+            </h1>
+        </div>
+
+        {/* Menu Items */}
+        <nav className="flex-1 space-y-4">
+            {[
+                { icon: Home, label: "Home", active: true },
+                { icon: Library, label: "Thư viện", active: false },
+                { icon: Settings, label: "Cài đặt", active: false },
+            ].map((item, idx) => (
+                <button key={idx} className={cn(
+                    "flex items-center gap-4 w-full p-3 rounded-xl transition-all font-medium",
+                    item.active 
+                        ? "bg-brand-bg text-brand-primary shadow-sm border border-orange-100" 
+                        : "text-gray-600 hover:bg-white/50"
+                )}>
+                    <item.icon size={22} strokeWidth={item.active ? 2.5 : 2} />
+                    <span>{item.label}</span>
+                </button>
+            ))}
+        </nav>
+
+        <div className="mt-auto text-xs text-center text-gray-400">
+            v1.0.0 (Beta)
+        </div>
+      </aside>
+
+      {/* --- MAIN CONTENT --- */}
+      <main className="flex-1 p-4 md:p-8 w-full max-w-7xl mx-auto">
+        
+        {/* Header: Search & User */}
+        <header className="flex flex-col-reverse md:flex-row items-center justify-between gap-4 mb-8">
+            {/* Search Bar Gradient như thiết kế */}
+            <div className="relative w-full md:w-2/3 max-w-xl group">
+                <div className="absolute inset-0 bg-gradient-to-r from-pink-200 to-blue-200 rounded-full blur opacity-40 group-hover:opacity-60 transition-opacity"></div>
+                <div className="relative flex items-center bg-white/80 backdrop-blur-sm rounded-full px-4 py-3 shadow-sm border border-white">
+                    <Search className="text-gray-400 mr-3" size={20} />
+                    <input 
+                        type="text" 
+                        placeholder="Tìm kiếm truyện..." 
+                        className="bg-transparent border-none outline-none w-full text-gray-700 placeholder-gray-400"
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                    />
+                </div>
+            </div>
+
+            {/* User Profile */}
+            <div className="flex items-center gap-3 self-end md:self-auto">
+                 <div className="text-right hidden sm:block">
+                    <p className="text-sm font-bold text-gray-700">Trang Huỳnh</p>
+                    <p className="text-xs text-green-600 font-semibold bg-green-100 px-2 rounded-full inline-block">Up Max</p>
+                 </div>
+                 <div className="w-10 h-10 rounded-full bg-pink-100 border border-white shadow-md overflow-hidden">
+                    <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Trang" alt="User" />
+                 </div>
+            </div>
+        </header>
+
+        {/* Categories (Horizontal Scroll) */}
+        <div className="mb-8 overflow-x-auto scrollbar-hide py-2">
+            <div className="flex gap-3 min-w-max">
+                <button 
+                    onClick={() => setActiveTab(0)}
+                    className={cn(
+                        "px-6 py-3 rounded-full font-medium transition-all shadow-sm whitespace-nowrap",
+                        activeTab === 0 
+                            ? "bg-brand-primary text-white shadow-brand-primary/30" 
+                            : "bg-white text-gray-500 hover:bg-gray-50"
+                    )}
+                >
+                    Tất cả
+                </button>
+                {CATEGORIES.map(cat => (
+                    <button 
+                        key={cat.id}
+                        onClick={() => setActiveTab(cat.id)}
+                        className={cn(
+                            "px-6 py-3 rounded-full font-medium transition-all shadow-sm whitespace-nowrap",
+                            activeTab === cat.id
+                                ? "bg-brand-primary text-white shadow-brand-primary/30" 
+                                : "bg-brand-accent/20 text-gray-700 hover:bg-brand-accent/40"
+                        )}
+                    >
+                        {cat.label}
+                    </button>
+                ))}
+            </div>
+        </div>
+
+        {/* Content Grid */}
+        <section>
+            <div className="flex items-center justify-between mb-4">
+                <h2 className="text-xl font-bold text-gray-800">Truyện hot của tuần</h2>
+                <span className="text-sm text-brand-primary font-medium cursor-pointer hover:underline">Xem thêm</span>
+            </div>
+
+            {results.length === 0 ? (
+                <div className="text-center py-20 text-gray-400">
+                    <p>Không tìm thấy truyện nào 🥲</p>
+                </div>
+            ) : (
+                <motion.div 
+                    layout
+                    className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4 md:gap-6"
+                >
+                    <AnimatePresence>
+                        {results.map((comic) => (
+                            <ComicCard key={comic.id} data={comic} />
+                        ))}
+                    </AnimatePresence>
+                </motion.div>
+            )}
+        </section>
+
+      </main>
+    </div>
+  );
+}
